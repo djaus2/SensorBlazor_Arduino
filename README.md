@@ -7,7 +7,6 @@ From **SensorBlazor** Shared Project:
 public enum SensorType {temperature,pressure,humidity,luminosity,accelerometer,environment,sswitch}
 ```
 Indexed from zero.
-
 ## BlazorIoTHubJsonSim
 Generates simulated sensor data and sends to the Blazor Service.
 
@@ -69,5 +68,5 @@ No.	Id	Sensor Type	Value	Values	State	TimeStamp
 0	Sensor0	temperature	137.035	null	False.	0
 ```
 
-## 2Do: REal Sensors based upon teh Template.
+## 2Do: Real Sensors based upon the Template.
 Coming
