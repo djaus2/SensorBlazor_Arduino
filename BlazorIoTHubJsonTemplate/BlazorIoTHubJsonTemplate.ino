@@ -21,14 +21,13 @@
 #include <Ethernet.h>
 #include <EthernetClient.h>
 
-//Use Json Serialisation. Alt: Manual
-const bool UseJson = true;
-
-//Alt: Use call to determine Mac from Registers
-#define USESTATICMAC  true
+#define SENSORTYPE 0
+//From enum: 
 
 //Delay after POST done in seconds
 #define DELAY  5
+//Number of reads to do
+#define MAXCOUNT 10
 
 #define I2C_ADDRESS 0x50
 #include <Wire.h>
@@ -124,36 +123,9 @@ void setup() {
  * Create a Json string for a Sensor's data
  * Sensor type depends upon sensorNo
  */
-String ManualSensor(int sensorNo)
-{
-  Serial.println("making POST request");
 
-  String postData = "{";
-  postData +="\"No\":";
-  postData +=sensorNo;
-  postData += ",\"Id\":\"Sensor"; //In C# this is a new GUID
-  postData +=sensorNo;
-  postData +="\"";
-  postData +=",\"SensorType\":";
-  postData +=sensorNo;
-  if (sensorNo<4)
-  {
-    postData +=",\"Value\":137.035";
-  }
-  else if (sensorNo<6)
-  {
-    postData +=",\"Values\":[1.2,3.4,0.789]";
-  }
-  else
-  {
-    postData +=",\"State\":true";
-  }
-  postData +="}";
 
-  return postData;
-}
-
-String JsonSensor(int sensorNo)
+String JsonSensor(int sensorNo, float value, float* values, bool state)
 {
   StaticJsonDocument<64> Sensor;
   Serial.println("making POST request");
@@ -165,19 +137,22 @@ String JsonSensor(int sensorNo)
   Sensor["SensorType"] = sensorNo;
   if (sensorNo<4)
   {
-    Sensor["Value"] = 199.8;
+    if (value != NULL)
+        Sensor["Value"] = value;
   }
   else if (sensorNo<6)
   {
-    //float values[] = {1.2,3.4,0.789};
-    JsonArray values = Sensor.createNestedArray("Values");
-    values.add(11.2);
-    values.add(13.4);
-    values.add(1.789);
+      if (values != NULL)
+      {
+          JsonArray values = Sensor.createNestedArray("Values");
+          int len = sizeof(values)/sizeof(values[0]);
+          for (int i=0;i<len; i++)
+            values.add(values[i]);
+      }
   }
   else
   {
-    Sensor["State"] = true;
+    Sensor["State"] = state;
   }
   String postData;
   serializeJsonPretty(Sensor,postData);
@@ -188,15 +163,26 @@ String JsonSensor(int sensorNo)
 }
 
 
+float ReadSensor()
+{
+    float value =  137.035;
+    return value;
+}
+
+float * ReadSensorValues()
+{
+    //float[] values = { 8.9,7.88,5.678 };
+    return NULL;
+}
+
 
 void loop() {
-  if (Count <7)
+  if (Count < MAXCOUNT)
   {
     String postData;
-    if (!UseJson)
-      postData = ManualSensor(Count);
-    else
-      postData = JsonSensor(Count);
+    float value = ReadSensor();
+    float* values = ReadSensorValues();
+    postData = JsonSensor(SENSORTYPE,value,values,false);
     Count++;
     String contentType = "application/json";
     client.post("/Sensor", contentType, postData);
