@@ -22,7 +22,8 @@
 #include <EthernetClient.h>
 
 #define SENSORTYPE 0
-//From enum: 
+// From public enum SensorType {temperature,pressure,humidity,luminosity,accelerometer,environment,sswitch}
+// Indexed from zero.
 
 //Delay after POST done in seconds
 #define DELAY  5
