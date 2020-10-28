@@ -68,5 +68,7 @@ No.	Id	Sensor Type	Value	Values	State	TimeStamp
 0	Sensor0	temperature	137.035	null	False.	0
 ```
 
-## 2Do: Real Sensors based upon the Template.
-Coming
+## Real Sensors based upon the Template.
+Added:   _(TB Tested, coded only thus far)_
+- BME280
+- DHT22
