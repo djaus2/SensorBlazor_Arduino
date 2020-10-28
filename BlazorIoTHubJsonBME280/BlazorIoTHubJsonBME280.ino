@@ -179,6 +179,11 @@ void loop() {
     String postData;
     float value = ReadSensor();
     float* values = ReadSensorValues();
+    Serial.print(values[0]);
+    Serial.print(",");
+    Serial.print(values[1]);
+    Serial.print(",");
+    Serial.println(values[2]);
     postData = JsonSensor(SENSORTYPE,value,values,false);
     Count++;
     String contentType = "application/json";
@@ -200,15 +205,3 @@ void loop() {
     
   }
 }
-/*
-float ReadSensor()
-{
-    float value =  137.035;
-    return value;
-}
-
-float * ReadSensorValues()
-{
-    //float[] values = { 8.9,7.88,5.678 };
-    return NULL;
-}*/

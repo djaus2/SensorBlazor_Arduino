@@ -72,8 +72,10 @@ float * ReadSensorValues()
    BME280::PresUnit presUnit(BME280::PresUnit_Pa);
 
    bme.read(pres, temp, hum, tempUnit, presUnit);
-
-   Serial.print("Temp: ");
+   
+   //Puting either of the next two code segments bumps space from 88% to 103%
+   //Doing in Loop() instead. Only 3% increase for second segment there.
+   /* Serial.print("Temp: ");
    Serial.print(temp);
    Serial.println("°"+ String(tempUnit == BME280::TempUnit_Celsius ? "C" :"F"));
    Serial.print("\t\tHumidity: ");
@@ -81,7 +83,13 @@ float * ReadSensorValues()
    Serial.println("% RH");
    Serial.print("\t\tPressure: ");
    Serial.print(pres);
-   Serial.println(" Pa");
+   Serial.println(" Pa");*/
+   /*
+   Serial.print(temp);
+   Serial.print(",");
+   Serial.print(hum);
+   Serial.print(",");
+   Serial.println(pres);*/
    float values[] = { temp,pres,hum };
    return values;
 }
