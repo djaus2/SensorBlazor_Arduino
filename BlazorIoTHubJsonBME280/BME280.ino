@@ -3,6 +3,16 @@
 // Environment Settings Example
 #include <BME280I2C.h>
 
+/**************************************************************************************
+  Connecting the BME280 Sensor:
+  Sensor              ->  Board
+-------------------------------
+  Vin (Voltage In)    ->  3.3V
+  Gnd (Ground)        ->  Gnd
+  SDA (Serial Data)   ->  A4 on Uno/Pro-Mini, 20 on Mega2560/Due, 2 Leonardo/Pro-Micro
+  SCK (Serial Clock)  ->  A5 on Uno/Pro-Mini, 21 on Mega2560/Due, 3 Leonardo/Pro-Micro
+**************************************************************************************/
+
   //Added this from one of the other repository headers:
    enum I2CAddr
    {
