@@ -25,16 +25,16 @@
 
 void SensorSetup();
 float ReadSensor();
-float * ReadSensorValues();
+void ReadSensorValues(float values[]);
 
-#define SENSORTYPE 0
+#define SENSORTYPE 5
 // From public enum SensorType {temperature,pressure,humidity,luminosity,accelerometer,environment,sswitch}
 // Indexed from zero.
 
 //Delay after POST done in seconds
 #define DELAY  5
 //Number of reads to do
-#define MAXCOUNT 10
+#define MAXCOUNT 20
 
 #define I2C_ADDRESS 0x50
 #include <Wire.h>
@@ -134,9 +134,9 @@ void setup() {
  */
 
 
-String JsonSensor(int sensorNo, float value, float* values, bool state)
+String JsonSensor(int sensorNo, float value, float values[], bool state, int valuesLen)
 {
-  StaticJsonDocument<64> Sensor;
+  StaticJsonDocument<128> Sensor;
   Serial.println("making POST request");
  
   Sensor["No"] = sensorNo;
@@ -153,18 +153,24 @@ String JsonSensor(int sensorNo, float value, float* values, bool state)
   {
       if (values != NULL)
       {
-          JsonArray values = Sensor.createNestedArray("Values");
-          int len = sizeof(values)/sizeof(values[0]);
-          for (int i=0;i<len; i++)
-            values.add(values[i]);
+          JsonArray valuesArray = Sensor.createNestedArray("Values");
+          //int len = sizeof(values)/sizeof(values[0]);
+          for (int i=0;i<valuesLen; i++)
+          {  
+            float value = values[i]; 
+            Serial.println(value);        
+            valuesArray.add(value);
+          }
       }
+      else
+        Serial.println("No values");
   }
   else
   {
     Sensor["State"] = state;
   }
   String postData;
-  serializeJsonPretty(Sensor,postData);
+  serializeJson(Sensor,postData);
   Serial.print("Sensor Data: ");
   Serial.println(postData);
   
@@ -178,11 +184,13 @@ void loop() {
   {
     String postData;
     float value = ReadSensor();
-    float* values = ReadSensorValues();
-    Serial.print(values[0]);
-    Serial.print(",");
+    float values[3];
+    ReadSensorValues(values);
+    Serial.println(values[0]);
+    Serial.println(values[1]);
     Serial.println(values[2]);
-    postData = JsonSensor(SENSORTYPE,value,values,false);
+
+    postData = JsonSensor(SENSORTYPE,value,values,false, 3);
     Count++;
     String contentType = "application/json";
     client.post("/Sensor", contentType, postData);

@@ -1,3 +1,4 @@
+#include <stddef.h>
 // Using BME280 Library
 // Ref: https://github.com/finitespace/BME280
 // Environment Settings Example
@@ -29,13 +30,14 @@
    BME280::Filter_16,
    BME280::SpiEnable_False,
    //BME280I2C::I2CAddr_0x76
-   I2CAddr::I2CAddr_0x76
-);
+   I2CAddr::I2CAddr_0x77
+    );
 
 BME280I2C bme(settings);
 
 void SensorSetup()
 {
+  Serial.println("Starting BME280 sensor!");
   // Following is in GetMacAddress()
   // Wire.begin();
 
@@ -52,10 +54,10 @@ void SensorSetup()
        Serial.println("Found BME280 sensor! Success.");
        break;
      case BME280::ChipModel_BMP280:
-       Serial.println("Found BMP280 sensor! No Humidity available.");
+       //Serial.println("Found BMP280 sensor! No Humidity available.");
        break;
-     default:
-       Serial.println("Found UNKNOWN sensor! Error!");
+     //default:
+       //Serial.println("Found UNKNOWN sensor! Error!");
   }
 }
 
@@ -64,7 +66,7 @@ float ReadSensor()
     return NULL;
 }
 
-float * ReadSensorValues()
+void ReadSensorValues(float values[])
 {
    float temp(NAN), hum(NAN), pres(NAN);
 
@@ -84,12 +86,14 @@ float * ReadSensorValues()
    Serial.print("\t\tPressure: ");
    Serial.print(pres);
    Serial.println(" Pa");*/
-   /*
-   Serial.print(temp);
+   
+   /*Serial.print(temp);
    Serial.print(",");
    Serial.print(hum);
    Serial.print(",");
    Serial.println(pres);*/
-   float values[] = { temp,pres,hum };
-   return values;
+  values[0] = temp;
+  values[1] = hum;
+  values[2] = pres;
+
 }

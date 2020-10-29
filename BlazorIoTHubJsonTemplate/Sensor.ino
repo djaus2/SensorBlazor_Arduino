@@ -7,11 +7,13 @@ void SensorSetup()
 float ReadSensor()
 {
     float value =  137.035;
-    return value;
+    return NULL;
 }
 
-float * ReadSensorValues()
+void ReadSensorValues(float values[])
 {
-    float[] values[] = { 8.9,7.88,5.678 };
-    return NULL;
+    float valuesA[] = { 8.9,7.88,5.678 };
+    values[0] = valuesA[0];
+    values[1] = valuesA[1];
+    values[2] = valuesA[2];
 }

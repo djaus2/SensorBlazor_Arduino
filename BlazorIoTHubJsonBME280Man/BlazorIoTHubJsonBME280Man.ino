@@ -1,3 +1,6 @@
+#include <SimpleDHT.h>
+#include <math.h>
+
 /*
   By David Jones.
   Post Simulated Sensor Data to a Blazor Service that onforwards it to an Azure IoT Hub.
@@ -13,8 +16,6 @@
   * Uses Ethrenet not WiFi
  */
 
-#include <ArduinoJson.h>
-#include <Ethernet.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <ArduinoHttpClient.h>
@@ -30,12 +31,14 @@ void ReadSensorValues(float values[]);
 // Indexed from zero.
 
 //Delay after POST done in seconds
-#define DELAY  5
+#define DELAY  10
 //Number of reads to do
-#define MAXCOUNT 2
+#define MAXCOUNT 20
 
 #define I2C_ADDRESS 0x50
 #include <Wire.h>
+
+#define USESTATICMAC
 
 #ifdef USESTATICMAC
 // Enter static Mac:
@@ -61,6 +64,7 @@ int Count; //Count the loops. A diffrent sensor for each.
 EthernetClient ether;
 HttpClient client = HttpClient(ether, serverAddress, port);
 
+/*
 void GetMacAddress()
 {
     Ref: https://www.freetronics.com.au/pages/setting-the-mac-address-using-the-mcp-24aa025e48
@@ -86,6 +90,7 @@ void GetMacAddress()
     Serial.println(tmpBuf);
 }
 
+
 byte readRegister(byte r)
 {
     unsigned char v;
@@ -101,9 +106,10 @@ byte readRegister(byte r)
     v = Wire.read();
     return v;
 }
-
+*/
 void setup() {
     Serial.begin(9600);
+    Serial.println("Starting");
 
     #ifndef USESTATICMAC
     GetMacAddress();
@@ -134,44 +140,44 @@ void setup() {
 
 String JsonSensor(int sensorNo, float value, float values[], bool state, int valuesLen)
 {
-  StaticJsonDocument<64> Sensor;
-  Serial.println("making POST request");
- 
-  Sensor["No"] = sensorNo;
-  String sensorType = "Sensor";
-  sensorType += sensorNo;
-  Sensor["Id"] = sensorType;
-  Sensor["SensorType"] = sensorNo;
-  if (sensorNo<4)
+  Serial.println("Making POST request");
+
+  String postData = "{";
+  postData += "\"No\":";
+  postData += sensorNo;
+  postData += ",\"Id\":\"Sensor"; //In C# this is a new GUID
+  postData += sensorNo;
+  postData += "\"";
+  postData += ",\"SensorType\":";
+  postData += sensorNo;
+  if (sensorNo < 4)
   {
-    if (value != NULL)
-        Sensor["Value"] = value;
+      postData += ",\"Value\":";
+      postData += value;
   }
-  else if (sensorNo<6)
+  else if (sensorNo < 6)
   {
-      if (values != NULL)
-      {
-          JsonArray valuesArray = Sensor.createNestedArray("Values");
-          //int len = sizeof(values)/sizeof(values[0]);
-          for (int i=0;i<valuesLen; i++)
-          {           
-            valuesArray.add(values[i]);
-          }
-      }
-      else
-        Serial.println("No values");
+      postData += ",\"Values\":[";
+      postData += values[0];
+      postData += ",";
+      postData += values[1];
+      postData += ",";
+      postData += values[2];
+      postData +="]";
   }
   else
   {
-    Sensor["State"] = state;
+      postData += ",\"State\":";
+      postData += state;
   }
-  String postData;
-  serializeJsonPretty(Sensor,postData);
-  Serial.print("Sensor Data: ");
+  postData += "}";
+
   Serial.println(postData);
   
   return postData;
 }
+
+
 
 
 
@@ -182,6 +188,34 @@ void loop() {
     float value = ReadSensor();
     float values[3];
     ReadSensorValues(values);
+    /*Serial.println(values[0]);
+    Serial.println(values[1]);
+    Serial.println(values[2]);*/
+   /* if ((isnan(values[0])) || (isnan(values[1])) || (isnan(values[2])) )
+    {
+      Serial.println("Ignoring invalid (NAN) results");
+      delay(DELAY*1000);
+      return;
+    }
+    else if ((values[1] > 100.0) || (values[1] < 0.0))
+    {
+        //Serial.println("Ignoring invalid Jumidity result");
+        delay(DELAY * 1000);
+        return;
+    }
+    else if ((values[0] > 100.0) || (values[0] < -20.0))
+    {
+        Serial.println("Ignoring invalid Temp result");
+        delay(DELAY * 1000);
+        return;
+    }
+    else if ((values[2] > 110000.0) || (values[2] < 95000))
+    {
+        //Serial.println("Ignoring invalid Pressure result");
+        delay(DELAY * 1000);
+        return;
+    }*/
+      
 
     postData = JsonSensor(SENSORTYPE,value,values,false, 3);
     Count++;
@@ -192,11 +226,10 @@ void loop() {
     int statusCode = client.responseStatusCode();
     String response = client.responseBody();
   
-    Serial.print("Status code: ");
+    //Serial.print("Status code (200=OK): ");
     Serial.println(statusCode);
-    Serial.print("Response: ");
+    //Serial.print("Response: ");
     Serial.println(response);
-    Serial.println("Wait 5 seconds");
     delay(DELAY*1000);
   }
   else

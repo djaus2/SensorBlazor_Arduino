@@ -2,7 +2,7 @@
 
 #include <SimpleDHT.h>
 
-// for DHT22, 
+// for DHT22,   
 //      VCC: 5V or 3V
 //      GND: GND
 //      DATA: 2
@@ -16,11 +16,10 @@ void SensorSetup()
 
 float ReadSensor()
 {
-    float value =  137.035;
-    return value;
+    return NULL;
 }
 
-float * ReadSensorValues()
+void ReadSensorValues(float values[])
 {
   float temperature = 0;
   float humidity = 0;
@@ -31,6 +30,8 @@ float * ReadSensorValues()
     delay(2000);
     return;
   }
-  float values[] = { temperature,0.0 ,humidity};
-  return values;
+  values[0] = temperature;
+  values[1] = 0.0;
+  values[2] = humidity;
+
 }

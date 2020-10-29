@@ -1,3 +1,5 @@
+#include <SimpleDHT.h>
+
 /*
   By David Jones.
   Post Simulated Sensor Data to a Blazor Service that onforwards it to an Azure IoT Hub.
@@ -23,19 +25,21 @@
 
 void SensorSetup();
 float ReadSensor();
-float * ReadSensorValues();
+void ReadSensorValues(float values[]);
 
-#define SENSORTYPE 0
+#define SENSORTYPE 5
 // From public enum SensorType {temperature,pressure,humidity,luminosity,accelerometer,environment,sswitch}
 // Indexed from zero.
 
 //Delay after POST done in seconds
-#define DELAY  5
+#define DELAY  10
 //Number of reads to do
-#define MAXCOUNT 10
+#define MAXCOUNT 20
 
 #define I2C_ADDRESS 0x50
 #include <Wire.h>
+
+#define USESTATICMAC
 
 #ifdef USESTATICMAC
 // Enter static Mac:
@@ -61,6 +65,7 @@ int Count; //Count the loops. A diffrent sensor for each.
 EthernetClient ether;
 HttpClient client = HttpClient(ether, serverAddress, port);
 
+/*
 void GetMacAddress()
 {
     Ref: https://www.freetronics.com.au/pages/setting-the-mac-address-using-the-mcp-24aa025e48
@@ -86,6 +91,7 @@ void GetMacAddress()
     Serial.println(tmpBuf);
 }
 
+
 byte readRegister(byte r)
 {
     unsigned char v;
@@ -101,9 +107,10 @@ byte readRegister(byte r)
     v = Wire.read();
     return v;
 }
-
+*/
 void setup() {
     Serial.begin(9600);
+    Serial.println("Starting");
 
     #ifndef USESTATICMAC
     GetMacAddress();
@@ -131,10 +138,13 @@ void setup() {
  * Sensor type depends upon sensorNo
  */
 
+//DynamicJsonDocument Sensor(96);
 
-String JsonSensor(int sensorNo, float value, float* values, bool state)
+StaticJsonDocument<96> Sensor;
+
+String JsonSensor(int sensorNo, float value, float values[], bool state, int valuesLen)
 {
-  StaticJsonDocument<64> Sensor;
+  
   Serial.println("making POST request");
  
   Sensor["No"] = sensorNo;
@@ -151,10 +161,19 @@ String JsonSensor(int sensorNo, float value, float* values, bool state)
   {
       if (values != NULL)
       {
-          JsonArray values = Sensor.createNestedArray("Values");
-          int len = sizeof(values)/sizeof(values[0]);
-          for (int i=0;i<len; i++)
-            values.add(values[i]);
+          JsonArray valuesArray = Sensor.createNestedArray("Values");
+          //int len = sizeof(values)/sizeof(values[0]);
+          for (int i=0;i<valuesLen; i++)
+          {  
+            float value = values[i]; 
+            Serial.println(value);        
+            valuesArray.add(value);
+          }
+      }
+      else
+      {
+        //Serial.println("No values");
+        return"";
       }
   }
   else
@@ -162,8 +181,8 @@ String JsonSensor(int sensorNo, float value, float* values, bool state)
     Sensor["State"] = state;
   }
   String postData;
-  serializeJsonPretty(Sensor,postData);
-  Serial.print("Sensor Data: ");
+  serializeJson(Sensor,postData);
+  //Serial.print("Sensor Data: ");
   Serial.println(postData);
   
   return postData;
@@ -178,13 +197,13 @@ void loop() {
   {
     String postData;
     float value = ReadSensor();
-    float* values = ReadSensorValues();
-    Serial.print(values[0]);
-    Serial.print(",");
-    Serial.print(values[1]);
-    Serial.print(",");
-    Serial.println(values[2]);
-    postData = JsonSensor(SENSORTYPE,value,values,false);
+    float values[3];
+    ReadSensorValues(values);
+    /*Serial.println(values[0]);
+    Serial.println(values[1]);
+    Serial.println(values[2]);*/
+
+    postData = JsonSensor(SENSORTYPE,value,values,false, 3);
     Count++;
     String contentType = "application/json";
     client.post("/Sensor", contentType, postData);
@@ -193,11 +212,11 @@ void loop() {
     int statusCode = client.responseStatusCode();
     String response = client.responseBody();
   
-    Serial.print("Status code: ");
+    //Serial.print("Status code: ");
     Serial.println(statusCode);
-    Serial.print("Response: ");
+    //Serial.print("Response: ");
     Serial.println(response);
-    Serial.println("Wait 5 seconds");
+    //Serial.println("Wait 5 seconds");
     delay(DELAY*1000);
   }
   else
