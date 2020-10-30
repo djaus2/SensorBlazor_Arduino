@@ -1,7 +1,7 @@
 # SensorBlazor_Arduino
 Mirrors [SensorBlazor](https://github.com/djaus2/SensorBlazor) repository .NET Core Console apps in that Arduino Sketches send Sensor data to Azure IoT Hub via the SensorBlazor service using Http POST.
 
-## Blazor Service of monitoring these IoT Hub Posts
+## Blazor Service of monitoring these Azure IoT Hub Posts:
 [BlazorD2CMessages](https://github.com/djaus2/BlazorD2CMessages)
 
 ## Sensor types:
@@ -75,4 +75,4 @@ No.	Id	Sensor Type	Value	Values	State	TimeStamp
 Added:
 - BME280
 - DHT22
-_More to come._ Request?
+- _More to come._ Requests?
