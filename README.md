@@ -69,6 +69,7 @@ No.	Id	Sensor Type	Value	Values	State	TimeStamp
 ```
 
 ## Real Sensors based upon the Template.
-Added:   _(TB Tested, coded only thus far)_
+Added:
 - BME280
 - DHT22
+_More to come._ Request?
