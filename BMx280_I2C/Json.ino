@@ -1,4 +1,4 @@
-String JsonSensor(int sensorNo, float value, float values[], bool state, int valuesLen)
+String JsonSensor(int sensorNo, String value, String values, bool state)
 {
   //wait for serial connection to open (only necessary on some boards)
   while (!Serial);
@@ -13,20 +13,15 @@ String JsonSensor(int sensorNo, float value, float values[], bool state, int val
   postData += "\"";
   postData += ",\"SensorType\":";
   postData += sensorNo;
-  if (sensorNo < 4)
+  if (value !="")
   {
-      postData += ",\"Value\":";
-      postData += value;
+    postData += ",\"Value\":";
+    postData += value;
   }
-  else if (sensorNo < 6)
-  {
-      postData += ",\"Values\":[";
-      postData += values[0];
-      postData += ",";
-      postData += values[1];
-      postData += ",";
-      postData += values[2];
-      postData +="]";
+  else if (values !="")
+  { 
+    postData += ",\"Values\":";
+    postData += values;
   }
   else
   {

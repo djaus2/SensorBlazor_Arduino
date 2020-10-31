@@ -63,7 +63,7 @@ void sensorSetup() {
 		bmx280.writeOversamplingHumidity(BMx280MI::OSRS_H_x16);
 }
 
-void sensorRead() 
+String sensorRead() 
 {
 	// put your main code here, to run repeatedly:
 	float temp(NAN), hum(NAN), pres(NAN);
@@ -86,18 +86,23 @@ void sensorRead()
 	pres=bmx280.getPressure();
 	hum=bmx280.getHumidity();
 
-	Serial.print("Pressure: "); Serial.println(bmx280.getPressure());
+	Serial.print("Pressure: "); Serial.println(pres);
 	Serial.print("Pressure (64 bit): "); Serial.println(bmx280.getPressure64());
-	Serial.print("Temperature: "); Serial.println(bmx280.getTemperature());
+	Serial.print("Temperature: "); Serial.println(temp);
 
 	//important: measurement data is read from the sensor in function hasValue() only. 
 	//make sure to call get*() functions only after hasValue() has returned true. 
 	if (bmx280.isBME280())
 	{
 		Serial.print("Humidity: "); 
-		Serial.println(bmx280.getHumidity());
+		Serial.println(hum);
 	}
-	 values[0] = temp;
-	 values[1] = hum;
-	 values[2] = pres;
+   String vals = "[";
+   vals+=temp;
+   vals +=",";
+   vals+=hum;
+   vals +=",";
+   vals+=pres;
+   vals +="]";
+   return vals;
 }

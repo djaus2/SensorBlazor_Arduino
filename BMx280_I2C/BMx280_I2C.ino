@@ -9,14 +9,14 @@
 char serverAddress[] = "192.168.0.4";  // server address
 int port = 80;
 int Count = 0;
-float values[3];
+
 EthernetClient ether;
 HttpClient client = HttpClient(ether, serverAddress, port);
+
 void ethernetSetup();
 void sensorSetup();
-void sensorRead();
-String JsonSensor(int sensorNo, float value, float values[], bool state, int valuesLen);
-
+String sensorRead();
+String JsonSensor(int sensorNo, String value, String values, bool state);
 
 void setup() {
   // put your setup code here, to run once:
@@ -34,14 +34,14 @@ void loop() {
 		delay(DELAY * 1000);
 		return;
 	}
-	sensorRead();
+	  String values = sensorRead();
     /*Serial.println("-------------");
     Serial.println(values[0]);
     Serial.println(values[1]);
     Serial.println(values[2]);*/
 
-    String postData = JsonSensor(5,NULL,values,false,3);
-        String contentType = "application/json";
+    String postData = JsonSensor(5,"",values,false);
+    String contentType = "application/json";
     client.post("/Sensor", contentType, postData);
 
     // read the status code and body of the response
